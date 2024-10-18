@@ -83,15 +83,14 @@ if __name__ == "__main__":
             cve_entry = json.loads(line.strip())
             cve_capec_data.update(cve_entry)
 
-    if not cve_capec_data:
+    if cve_capec_data:
+        # Load the CAPEC database
+        with open(CAPEC_FILE, 'r') as f:
+            capec_list = json.load(f)
+
+        cve_year = list(cve_capec_data.keys())[0].split('-')[1]
+        
+        process_capec(cve_capec_data, capec_list, cve_year)
+        save_jsonl(cve_capec_data)
+    else:
         print("[-]No new vulnerabilities found")
-        sys.exit(0)
-
-    # Load the CAPEC database
-    with open(CAPEC_FILE, 'r') as f:
-        capec_list = json.load(f)
-
-    cve_year = list(cve_capec_data.keys())[0].split('-')[1]
-    
-    process_capec(cve_capec_data, capec_list, cve_year)
-    save_jsonl(cve_capec_data)

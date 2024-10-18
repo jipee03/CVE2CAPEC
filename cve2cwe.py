@@ -88,12 +88,11 @@ if __name__ == "__main__":
             cve = json.loads(line.strip())
             cve_cwe_data.update(cve)
 
-    if not cve_cwe_data:
+    if cve_cwe_data:
+        cwe_db = load_db()
+        
+        cve_year = list(cve_cwe_data.keys())[0].split('-')[1]
+
+        process_cve_to_cwe(cve_cwe_data, cve_year, cwe_db)
+    else:
         print("[-]No new vulnerabilities found")
-        sys.exit(1)
-
-    cwe_db = load_db()
-    
-    cve_year = list(cve_cwe_data.keys())[0].split('-')[1]
-
-    process_cve_to_cwe(cve_cwe_data, cve_year, cwe_db)

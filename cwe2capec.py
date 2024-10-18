@@ -60,20 +60,19 @@ if __name__ == "__main__":
             cve = json.loads(line.strip())
             cve_cwe_data.update(cve)
     
-    if not cve_cwe_data:
+    if cve_cwe_data:
+        cwe_db = load_db()
+        
+        # Get the year of the CVEs
+        cve_year = list(cve_cwe_data.keys())[0].split('-')[1]
+
+        # Process each CVE to extract the related CAPEC entries
+        cve_capec_data = {}
+        for cve in tqdm(cve_cwe_data, desc=f"Processing CWE to CAPEC for CVE-{cve_year}", unit="CVE"):
+            cwe_list = cve_cwe_data[cve]["CWE"]
+            cve_capec_data[cve] = {"CWE": cwe_list}
+            cve_capec_data[cve]["CAPEC"] = process_cwe_to_capec(cwe_list, cwe_db)
+
+        save_jsonl(cve_capec_data)
+    else:
         print("[-]No new vulnerabilities found")
-        sys.exit(0)
-
-    cwe_db = load_db()
-    
-    # Get the year of the CVEs
-    cve_year = list(cve_cwe_data.keys())[0].split('-')[1]
-
-    # Process each CVE to extract the related CAPEC entries
-    cve_capec_data = {}
-    for cve in tqdm(cve_cwe_data, desc=f"Processing CWE to CAPEC for CVE-{cve_year}", unit="CVE"):
-        cwe_list = cve_cwe_data[cve]["CWE"]
-        cve_capec_data[cve] = {"CWE": cwe_list}
-        cve_capec_data[cve]["CAPEC"] = process_cwe_to_capec(cwe_list, cwe_db)
-
-    save_jsonl(cve_capec_data)
