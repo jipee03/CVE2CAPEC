@@ -42,7 +42,7 @@ However, if you want to run this project by your own :
 ## Installation
 
 ```sh
-pip install -r requierements.txt
+pip install -r requirements.txt
 ```
 
 ## Usage
