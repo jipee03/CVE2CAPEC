@@ -56,6 +56,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Pull latest changes
+        run: git pull
+
       - name: Retrieve CWE
         run: python cve2cwe.py
 
@@ -86,6 +89,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Pull latest changes
+        run: git pull
 
       - name: Retrieve CAPEC
         run: python cwe2capec.py
@@ -118,6 +124,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Pull latest changes
+        run: git pull
+
       - name: Retrieve TECHNIQUES
         run: python capec2technique.py
 
@@ -128,7 +137,7 @@ jobs:
           git diff --quiet && git diff --staged --quiet || git add results/new_cves.jsonl
           git diff --quiet && git diff --staged --quiet || git add lastUpdate.txt
           git diff --quiet && git diff --staged --quiet || git add database/*.jsonl
-          git diff --staged --quiet || git commit -m "Retrieve TECHNIQUES from new CVEs's CAPEC and update CVE DB"
+          git diff --staged --quiet || git commit -m "Retrieve new CVEs's and update CVE DB"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
