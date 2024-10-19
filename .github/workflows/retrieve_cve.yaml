@@ -32,6 +32,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "githu-actions@users.noreply.github.com"
+          git diff --quiet && git diff --staged --quiet || git add lastUpdate.txt
           git diff --quiet && git diff --staged --quiet || git add results/new_cves.jsonl
           git diff --staged --quiet || git commit -m "Retrieve new CVEs"
           git push
