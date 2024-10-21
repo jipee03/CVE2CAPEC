@@ -52,6 +52,7 @@ pip install -r requirements.txt
 ```sh
 python update_capec.py
 python update_cwe.py
+python update_technique.py
 ```
 
 ### Get new CVEs
