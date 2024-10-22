@@ -306,7 +306,7 @@
             var mitre_button = document.createElement('div');
             mitre_button.className = 'col-md-6';
             mitre_button.style.textAlign = 'center';
-            mitre_button.innerHTML = '<button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="window.open(\'/mitre/\', \'_blank\')" id="mitre_buton">Open MITRE ATT&CK Navigator</button>';
+            mitre_button.innerHTML = '<button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="window.open(\'mitre/\', \'_blank\')" id="mitre_buton">Open MITRE ATT&CK Navigator</button>';
             control_row.appendChild(mitre_button);
         }
 
@@ -325,7 +325,6 @@
         
         // Get the list of techniques, some node.to maybe null
         var techniques_list = data_cleaned.filter(node => node.to !== null);
-        console.log(techniques_list);
         var max_score = 0;
 
 

@@ -24,7 +24,7 @@
 
     "default_layers": {
         "enabled": true,
-        "urls": ["mitre/assets/export.json"]
+        "urls": ["CVE2CAPEC/mitre/assets/export.json"]
     },
 
     "comment_color": "yellow",
