@@ -2,7 +2,7 @@
 <div align="center">
   <h1 align="center">CVE2CAPEC</h1>
   <p align="center">
-    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-v3.11.9-blue?style=for-the-badge&logo=Python"></a> <a href="https://github.com/Darkiros/AutoPentest"><img src="https://img.shields.io/badge/Github-35495E?logo=GitHub&style=for-the-badge"></a><br/><br/>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-v3.11.9-blue?style=for-the-badge&logo=Python"></a> <a href="https://github.com/Galeax/CVE2CAPEC"><img src="https://img.shields.io/badge/Github-35495E?logo=GitHub&style=for-the-badge"></a><br/><br/>
     Get CVE, CWE, CAPEC, and MITRE ATT&CK Techniques data automatically.
   </p>
 </div>
@@ -46,6 +46,9 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+
+You can also interactively view the CWE, CAPEC and TECHNIQUE associated with each CVE:
+[https://galeax.github.io/CVE2CAPEC/](https://galeax.github.io/CVE2CAPEC/)
 
 ### Update databases
 
