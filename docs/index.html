@@ -217,7 +217,7 @@
                 <div class="col-md-7" style="position: relative; background-color: white;">
                     <div id="container"></div>
                     <button id="full_screen" class="js-toggle-fullscreen-btn toggle-fullscreen-btn" aria-label="Enter fullscreen mode" 
-                            hidden style="position: absolute; top: 0;" onclick="chart.fullScreen(true)">
+                            hidden style="position: absolute; top: 10px;" onclick="chart.fullScreen(true)">
                         <svg class="toggle-fullscreen-svg" width="28" height="28" viewBox="-2 -2 28 28">
                             <g class="icon-fullscreen-enter">
                                 <path d="M 2 9 v -7 h 7" />
@@ -243,6 +243,8 @@
             </div>
         </div>     
     </main>
+    <div style="height: 100%; position: relative;" id="frame" hidden>
+    </div>
 </body>
 
 <script>
@@ -643,6 +645,27 @@
         window.URL.revokeObjectURL(url);
     }
 
+    function waitForElm(selector) {
+        return new Promise(resolve => {
+            if (document.getElementById('mitre').contentWindow.document.querySelector(selector)) {
+                return resolve(document.getElementById('mitre').contentWindow.document.querySelector(selector));
+            }
+
+            const observer = new MutationObserver(mutations => {
+                if (document.getElementById('mitre').contentWindow.document.querySelector(selector)) {
+                    observer.disconnect();
+                    resolve(document.getElementById('mitre').contentWindow.document.querySelector(selector));
+                }
+            });
+
+            // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+            observer.observe(document.getElementById('mitre').contentWindow.document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    }
+
     async function print_mitre() {
         var layer = localStorage.getItem('layer');
         if (!layer) {
@@ -661,17 +684,107 @@
         var iframe = document.createElement('iframe');
         iframe.src = 'mitre/';
         iframe.id = "mitre";
+        iframe.allowFullscreen = true;
         iframe.width = "100%";
         iframe.height = "100%";
         iframe.style.marginTop = "2%";
 
-        document.body.appendChild(iframe);
+        document.getElementById('frame').appendChild(iframe);
+        document.getElementById('frame').hidden = false;
+
+        iframe.onload = function() {
+            // Vérifier si on peut accéder au contenu de l'iframe
+            var iframe = document.getElementById('mitre');
+            var iframeDoc = iframe.contentWindow.document;
+
+            // Créer le bouton dynamiquement
+            var button = iframeDoc.createElement('button');
+
+            button.innerHTML = '<svg class="toggle-fullscreen-svg frame-full" width="28" height="28" viewBox="-2 -2 28 28"><g class="icon-fullscreen-enter"><path d="M 2 9 v -7 h 7" /><path d="M 22 9 v -7 h -7" /><path d="M 22 15 v 7 h -7" /><path d="M 2 15 v 7 h 7" /></g><g class="icon-fullscreen-leave"><path d="M 24 17 h -7 v 7" /><path d="M 0 17 h 7 v 7" /><path d="M 0 7 h 7 v -7" /><path d="M 24 7 h -7 v -7" /></g></svg>';
+            button.className = "js-toggle-fullscreen-btn toggle-fullscreen-btn";
+            button.title = "Enter fullscreen mode";
+            button.onclick = function() {
+                parent.fullscreen();
+            };
+            var style_balise = iframeDoc.createElement('style');
+            style_balise.innerHTML = `
+                .toggle-fullscreen-btn {
+                    background: none;
+                    border: 0;
+                    padding: 0;
+                }
+                .toggle-fullscreen-svg path {
+                    transform-box: view-box;
+                    transform-origin: 12px 12px;
+                    fill: none;
+                    stroke: hsl(225, 10%, 8%);
+                    stroke-width: 4;
+                    transition: .15s;
+                }
+                .toggle-fullscreen-btn:hover path:nth-child(1),
+                .toggle-fullscreen-btn:focus path:nth-child(1) {
+                    transform: translate(-2px, -2px);
+                }
+                .toggle-fullscreen-btn:hover path:nth-child(2),
+                .toggle-fullscreen-btn:focus path:nth-child(2) {
+                    transform: translate(2px, -2px);
+                }
+                .toggle-fullscreen-btn:hover path:nth-child(3),
+                .toggle-fullscreen-btn:focus path:nth-child(3) {
+                    transform: translate(2px, 2px);
+                }
+                .toggle-fullscreen-btn:hover path:nth-child(4),
+                .toggle-fullscreen-btn:focus path:nth-child(4) {
+                    transform: translate(-2px, 2px);
+                }
+                .toggle-fullscreen-btn:not(.on) .icon-fullscreen-leave {
+                    display: none;
+                }
+                .toggle-fullscreen-btn.on .icon-fullscreen-enter {
+                    display: none;
+                }
+                .frame-full path {
+                    stroke: white;
+                }
+            `;
+            iframeDoc.head.appendChild(style_balise);
+            button.style = "position: absolute; top: 12px; right:50px;";
+
+            waitForElm('.help-header').then((elm) => {
+                elm.appendChild(button);
+            });
+        };
     }
 
     async function example() {
         document.getElementById('cves').innerText = 'CVE-2024-37079\nCVE-2024-22274\n';
-        process();
-        print_mitre();
+        await process();
+        await print_mitre();
+    }
+
+    function fullscreen() {
+        // check if fullscreen mode is available
+        if (document.fullscreenEnabled || 
+            document.webkitFullscreenEnabled || 
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled) {
+            
+            // which element will be fullscreen
+            var iframe = document.querySelector('#frame iframe');
+            // Do fullscreen
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) {
+                iframe.webkitRequestFullscreen();
+            } else if (iframe.mozRequestFullScreen) {
+                iframe.mozRequestFullScreen();
+            } else if (iframe.msRequestFullscreen) {
+                iframe.msRequestFullscreen();
+            }
+        }
+        else {
+            document.querySelector('.error').innerHTML = 'Your browser is not supported';
+        }
     }
 
 </script>
