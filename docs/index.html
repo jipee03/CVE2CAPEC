@@ -11,8 +11,10 @@
     
     <title>CVE2CAPEC</title>
     <style>
+        @import url("https://fonts.googleapis.com/css?family=Montserrat");
         html {
             height: 100%;
+            scrollbar-width: none;
         }
 
         body {
@@ -26,7 +28,9 @@
         header {
             background-color: #333;
             color: white;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 1rem;
             font-size: 24px;
             margin-bottom: 2%;
@@ -34,7 +38,9 @@
 
         .column {
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            min-height: 200px;
+            height: 350px;
+            max-height: 350px;
+            overflow: scroll;
         }
 
         footer {
@@ -47,46 +53,196 @@
             width: 100%;
         }
 
+        .legend {
+            font-family: Verdana, Arial, Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            font-size: medium;
+            color: gray;
+        }
+
+        #cves[placeholder]:empty::before {
+            content: attr(placeholder);
+            color: lightgray; 
+        }
+
+        #cves[placeholder]:empty:focus::before {
+            content: "";
+        }
+
         #container {
             height: 100%;
             margin-left: 3%; 
-            margin-top: 2%; 
             margin-right: 3%;
-            margin-bottom: 5%;
         }
 
+        .arrow {
+            position: absolute;
+            /*left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);*/
+            color: #0d6efd;
+            text-decoration: none;
+            /*font-size: 2em;*/
+            display: inline-block;
+            font-family: Montserrat;
+            /*text-transform: uppercase;*/
+            padding: 0.5em 2em;
+            border: 2px solid #0d6efd;
+            transition: 0.02s 0.2s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .arrow::before {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 100%;
+            bottom: 0;
+            background: #0d6efd;
+            transition: 0.3s 0.2s cubic-bezier(0.1, 0, 0.1, 1), left 0.3s cubic-bezier(0.1, 0, 0.1, 1);
+            z-index: -1;
+        }
+
+        .arrow::after {
+            content: "";
+            display: inline-block;
+            background-image: url("https://cdn-icons-png.flaticon.com/128/109/109617.png");
+            position: absolute;
+            top: 0;
+            left: calc(100% - 3em);
+            right: 3em;
+            bottom: 0;
+            background-size: 1.5em;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: right 0.3s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .arrow:hover {
+            padding: 0.5em 3.5em 0.5em 0.5em;
+        }
+
+        .arrow:hover::before {
+            left: calc(100% - 3em);
+            right: 0;
+            transition: 0.3s cubic-bezier(0.1, 0, 0.1, 1), left 0.3s 0.2s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .arrow:hover::after {
+            right: 0;
+            transition: right 0.3s 0.2s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .toggle-fullscreen-btn {
+            position: fixed;
+            z-index: 10000;
+            top: 10px;
+            right: 10px;
+            border: 0;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+
+        .toggle-fullscreen-svg {
+            display: block;
+            height: auto;
+        }
+
+        .toggle-fullscreen-svg path {
+            transform-box: view-box;
+            transform-origin: 12px 12px;
+            fill: none;
+            stroke: hsl(225, 10%, 8%);
+            stroke-width: 4;
+            transition: .15s;
+        }
+
+
+        .toggle-fullscreen-btn:hover path:nth-child(1),
+        .toggle-fullscreen-btn:focus path:nth-child(1) {
+            transform: translate(-2px, -2px);
+        }
+
+        .toggle-fullscreen-btn:hover path:nth-child(2),
+        .toggle-fullscreen-btn:focus path:nth-child(2) {
+            transform: translate(2px, -2px);
+        }
+
+        .toggle-fullscreen-btn:hover path:nth-child(3),
+        .toggle-fullscreen-btn:focus path:nth-child(3) {
+            transform: translate(2px, 2px);
+        }
+
+        .toggle-fullscreen-btn:hover path:nth-child(4),
+        .toggle-fullscreen-btn:focus path:nth-child(4) {
+            transform: translate(-2px, 2px);
+        }
+
+
+        .toggle-fullscreen-btn:not(.on) .icon-fullscreen-leave {
+            display: none;
+        }
+
+        .toggle-fullscreen-btn.on .icon-fullscreen-enter {
+            display: none;
+        }
 
     </style>
 </head>
 <body>
 
     <header>
-        CVE2CAPEC
+        <span class="fs-6">Made with ❤️ in France 🇫🇷 by <a href="https://galeax.com/">Galeax</a></span>
+        <span style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;">CVE2CAPEC</span>
+        <button class="btn btn-primary" style="margin-left: auto;" onclick="example()">Try an example</button>
     </header>
 
     <main>
         <div class="page-inner" id="inner">
             <div class="row" style="margin-left: 2%; margin-right: 2%;">
-                <div class="col-md-12">
-                    <h3 style="text-align: center;">list of CVEs</h3>
+                <div class="col-md-3">
+                    <h4 style="text-align: center;">1. Type a list of CVEs</h4>
                     <div class="card column">
-                        <div class="card-body" contenteditable="true" id="cves">
+                        <div class="card-body" placeholder="CVE-2024-37079..." contenteditable="true" id="cves">
                         </div>
                     </div>
+                </div>
+                <div class="col-md-2 d-flex justify-content-center align-items-center">
+                    <a href="#" class="arrow" onclick="process()">2. Process</a>
+                </div>
+                <div class="col-md-7" style="position: relative; background-color: white;">
+                    <div id="container"></div>
+                    <button id="full_screen" class="js-toggle-fullscreen-btn toggle-fullscreen-btn" aria-label="Enter fullscreen mode" 
+                            hidden style="position: absolute; top: 0;" onclick="chart.fullScreen(true)">
+                        <svg class="toggle-fullscreen-svg" width="28" height="28" viewBox="-2 -2 28 28">
+                            <g class="icon-fullscreen-enter">
+                                <path d="M 2 9 v -7 h 7" />
+                                <path d="M 22 9 v -7 h -7" />
+                                <path d="M 22 15 v 7 h -7" />
+                                <path d="M 2 15 v 7 h 7" />
+                            </g>
+                            
+                            <g class="icon-fullscreen-leave">
+                                <path d="M 24 17 h -7 v 7" />
+                                <path d="M 0 17 h 7 v 7" />
+                                <path d="M 0 7 h 7 v -7" />
+                                <path d="M 24 7 h -7 v -7" />
+                            </g>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <div class="row" style="margin-left: 2%; margin-right: 2%;">
                 <div class="col-md-12" id="process_button" style="text-align: center;">
-                    <button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="process()">Process</button>
+                    <button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="print_mitre()">3. Generate MITRE ATT&CK Matrix</button>
                 </div>
             </div>
-        </div>
+        </div>     
     </main>
-    <div id="container"></div>
-
-    <footer>
-        Made with ❤️ in France 🇫🇷 by <a href="https://galeax.com/">Galeax</a>
-    </footer>
 </body>
 
 <script>
@@ -95,13 +251,25 @@
 
     var chart = anychart.sankey();
 
-    // set the chart's padding
     chart.padding(20, 40);
-    
-    // add a title
-    chart.title('CVEs data flow');
 
-    // set the chart container id
+    chart.flow({
+        normal: {
+            fill: function () {
+                return anychart.color.lighten(this.sourceColor, 0.5) + ' ' + 0.3;
+            }
+        },
+        hovered: {
+            fill: function () {
+                return this.sourceColor + ' ' + 0.8;
+            }
+        }
+    });
+        
+
+    chart.node().labels().useHtml(true);
+    chart.node().labels().format('<span style="font-weight:bold">{%name}</span>');
+
     chart.container('container');
 
     // Adjust the chart size dynamically
@@ -112,6 +280,27 @@
         event.preventDefault();
         document.execCommand('inserttext', false, event.clipboardData.getData('text/plain'));
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var contentEditableElements = document.querySelectorAll('[contenteditable]');
+
+        // Function to check if the element is empty and clear it
+        function checkAndClear(element) {
+            if (!element.textContent.trim().length) {
+                element.innerHTML = '';  
+            }
+        }
+
+        contentEditableElements.forEach(function(element) {
+            checkAndClear(element);
+
+            element.addEventListener('focusout', function() {
+                checkAndClear(element);
+            });
+        });
+    });
+
+
 
 
     async function process() {
@@ -255,13 +444,7 @@
                                 "to": null,
                                 "value": 1
                             };
-                            data.push(node);/*
-                            node = {
-                                "from": "CAPEC-N/A",
-                                "to": null,
-                                "value": 1
-                            };
-                            data.push(node);*/
+                            data.push(node);
                         }
                     }
                 }            
@@ -288,27 +471,9 @@
         chart.maxHeight('100%');
         chart.draw();
 
+        document.getElementById('full_screen').hidden = false;
+
         await create_mitre_layer();
-
-        var orga = document.getElementById('inner');
-        if (!document.getElementById('control_row')) {
-            var control_row = document.createElement('div');
-            control_row.className = 'row';
-            control_row.id = 'control_row';
-            orga.appendChild(control_row);
-
-            var download_button = document.createElement('div');
-            download_button.className = 'col-md-6';
-            download_button.style.textAlign = 'center';
-            download_button.innerHTML = '<button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="download_layer()" id="download_button">Download MITRE ATT&CK Layer</button>';
-            control_row.appendChild(download_button);
-
-            var mitre_button = document.createElement('div');
-            mitre_button.className = 'col-md-6';
-            mitre_button.style.textAlign = 'center';
-            mitre_button.innerHTML = '<button type="button" class="btn btn-primary" style="margin-top: 2%; width: 50%;" onclick="window.open(\'mitre/\', \'_blank\')" id="mitre_buton">Open MITRE ATT&CK Navigator</button>';
-            control_row.appendChild(mitre_button);
-        }
 
         if (cves_not_found.length > 0) {
             Swal.fire({
@@ -341,7 +506,6 @@
 
         var tmp = Object.assign({}, data_layer);
         for (var key in tmp) {
-            // si la clé match avec T\d+\.\d+ alors on ajoute la valeur à la clé parente
             if (key.match(/T\d+\.\d+/)) {
                 var parent = key.split('.')[0];
                 if (data_layer[parent]) {
@@ -477,6 +641,37 @@
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
+    }
+
+    async function print_mitre() {
+        var layer = localStorage.getItem('layer');
+        if (!layer) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No layer found',
+                text: 'Please enter CVEs and click on Process first.',
+            });
+            return;
+        }
+        
+        // add iframe to display the MITRE ATT&CK matrix
+        if (document.getElementById('mitre')) {
+            document.getElementById('mitre').remove();
+        }
+        var iframe = document.createElement('iframe');
+        iframe.src = 'mitre/';
+        iframe.id = "mitre";
+        iframe.width = "100%";
+        iframe.height = "100%";
+        iframe.style.marginTop = "2%";
+
+        document.body.appendChild(iframe);
+    }
+
+    async function example() {
+        document.getElementById('cves').innerText = 'CVE-2024-37079\nCVE-2024-22274\n';
+        process();
+        print_mitre();
     }
 
 </script>
