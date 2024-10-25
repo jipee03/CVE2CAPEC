@@ -4,7 +4,7 @@
   <p align="center">
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-v3.11.9-blue?style=for-the-badge&logo=Python"></a>
     <a href="https://github.com/Galeax/CVE2CAPEC"><img src="https://img.shields.io/badge/Github-35495E?logo=GitHub&style=for-the-badge"></a>
-    <a href="https://galeax.github.io/CVE2CAPEC/"><img src=https://img.shields.io/badge/github%20pages-121013?style=for-the-badge&logo=github&logoColor=white"></a>
+    <a href="https://galeax.github.io/CVE2CAPEC/"><img src="https://img.shields.io/badge/github%20pages-121013?style=for-the-badge&logo=github&logoColor=white"></a>
     <br/><br/>
     Get CVE, CWE, CAPEC, and MITRE ATT&CK Techniques data automatically.
     <br/>
