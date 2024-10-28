@@ -241,6 +241,8 @@
 <script>
     var metrics = {"CWE": {}, "CAPEC": {}, "TECHNIQUES": {}};
     var data_cleaned = [];
+    const url_params = new URLSearchParams(window.location.search);
+    const cves_param = url_params.get('input');
     var chart = echarts.init(document.getElementById('container'), null, {
             renderer: 'canvas',
             useDirtyRect: false
@@ -271,7 +273,41 @@
         });
     });
 
+    
+    document.onload = check_param();
 
+
+
+    async function check_param() {
+        if (cves_param) {
+            var cves_b64 = atob(cves_param);
+            var cves_gzip = new Uint8Array(cves_b64.split('').map(c => c.charCodeAt(0)));
+            var cves = await decompress(cves_gzip, 'gzip');
+            document.getElementById('cves').innerText = cves.replace(/,/g, '\n');
+            await process();
+        }
+    }
+
+    // Gzip compression
+    function compress(string, encoding) {
+        const byteArray = new TextEncoder().encode(string);
+        const cs = new CompressionStream(encoding);
+        const writer = cs.writable.getWriter();
+        writer.write(byteArray);
+        writer.close();
+        return new Response(cs.readable).arrayBuffer();
+        }
+
+    // Gzip decompression
+    function decompress(byteArray, encoding) {
+        const cs = new DecompressionStream(encoding);
+        const writer = cs.writable.getWriter();
+        writer.write(byteArray);
+        writer.close();
+        return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
+            return new TextDecoder().decode(arrayBuffer);
+        });
+    }
 
 
     async function process() {
@@ -532,6 +568,13 @@
         }
 
         window.addEventListener('resize', chart.resize);
+
+        // set list of CVEs in the URL
+        var cves = document.getElementById('cves').innerText.trim().replace(/\n/g, ',');
+        var cves_gzip = await compress(cves, 'gzip');
+        var cves_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(cves_gzip)));
+        history.pushState({}, '', `?input=${cves_b64}`);
+
 
         await create_mitre_layer();
 
