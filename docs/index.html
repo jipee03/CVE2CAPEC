@@ -175,6 +175,11 @@
                 height: 100px;
                 margin-bottom: 2%;
             }
+
+            .process-row {
+                margin-top: 2%;
+                padding-right: 0 !important;
+            }
         }
 
     </style>
@@ -224,7 +229,14 @@
                 </div>
             </div>
             <div class="col-lg-2 col-md-12 d-flex align-items-center process">
-                <a href="#" class="btn btn-primary mx-auto" onclick="process()">2. Generate<br/>MITRE ATT&CK</a>
+                <div class="row mx-auto process-row" style="padding-right: 4%;">
+                    <a href="#" class="btn btn-primary mx-auto" onclick="process()">2. Generate<br/>MITRE ATT&CK</a>
+                    <select id="layer_type" class="form-select mt-2 text-center bg-secondary-subtle">
+                        <option value="enterprise">Enterprise</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="ics">ICS</option>
+                    </select>
+                </div>
             </div>
             <div class="col-lg-7 col-md-12 position-relative bg-white">
                 <div class="mx-3" style="width: 100%; min-height: 400px;" id="container"></div>
@@ -241,8 +253,6 @@
 <script>
     var metrics = {"CWE": {}, "CAPEC": {}, "TECHNIQUES": {}};
     var data_cleaned = [];
-    const url_params = new URLSearchParams(window.location.search);
-    const cves_param = url_params.get('input');
     var chart = echarts.init(document.getElementById('container'), null, {
             renderer: 'canvas',
             useDirtyRect: false
@@ -254,7 +264,18 @@
         document.execCommand('inserttext', false, event.clipboardData.getData('text/plain'));
     });
 
+    document.querySelector("#layer_type").addEventListener('change', function() {
+        adapt();
+    });
+
+    document.querySelector("#cves").addEventListener('DOMSubtreeModified', function() {
+        adapt();
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
+
+        check_param();
+
         var contentEditableElements = document.querySelectorAll('[contenteditable]');
 
         // Function to check if the element is empty and clear it
@@ -273,18 +294,29 @@
         });
     });
 
-    
-    document.onload = check_param();
 
+    async function adapt() {
+        var layer_type = document.getElementById('layer_type').value
+        var cves = document.getElementById('cves').innerText.trim().replace(/\n/g, ',');
+        var cves_gzip = await compress(cves, 'gzip');
+        var cves_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(cves_gzip)));
+        history.pushState({}, '', `?layer=${layer_type}&input=${cves_b64}`);
+    }
 
 
     async function check_param() {
+        var url_params = new URLSearchParams(window.location.search);
+        var cves_param = url_params.get('input');
+        var layer_param = url_params.get('layer');
         if (cves_param) {
             var cves_b64 = atob(cves_param);
             var cves_gzip = new Uint8Array(cves_b64.split('').map(c => c.charCodeAt(0)));
             var cves = await decompress(cves_gzip, 'gzip');
             document.getElementById('cves').innerText = cves.replace(/,/g, '\n');
             await process();
+        }
+        if (layer_param) {
+            document.getElementById('layer_type').value = layer_param;
         }
     }
 
@@ -312,6 +344,12 @@
 
     async function process() {
 
+        // clear all data are not CVE-XXXX-XXXX format
+        var cves = document.getElementById('cves').innerText.trim();
+        var cves_array = cves.split('\n').map(cve => cve.trim()).filter(cve => cve !== '');
+        var cves_cleaned = cves_array.filter(cve => cve.match(/^CVE-\d{4}-\d{4,}$/));
+        document.getElementById('cves').innerText = cves_cleaned.join('\n');
+
         chart.showLoading();
 
         data_cleaned = [];
@@ -328,6 +366,22 @@
             return;
         }
 
+        var techniques_association;
+
+        try {
+            techniques_association = await fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/techniques_association.json').then(res => res.text());
+            techniques_association = JSON.parse(techniques_association);
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'An error occurred',
+                text: 'Failed to fetch the Techniques association database',
+            });
+            chart.hideLoading();
+            return;
+        }
+
         var cves_array = cves.split('\n').map(cve => cve.trim()).filter(cve => cve !== '');
 
         // Group by year
@@ -335,10 +389,12 @@
         for (var i = 0; i < cves_array.length; i++) {
             var cve = cves_array[i];
             var year = cve.split('-')[1];
-            if (!cves_list[year]) {
-                cves_list[year] = [];
+            if (year) {
+                if (!cves_list[year]) {
+                    cves_list[year] = [];
+                }
+                cves_list[year].push(cve);
             }
-            cves_list[year].push(cve);
         }
 
         var data = [];
@@ -392,8 +448,24 @@
                 var lines = capec_data_raw[technique]['techniques'].split("NAME:ATTACK:ENTRY ")
                 for (var i = 1; i < lines.length; i++) {
                     var line = lines[i];
+                    var layer_type = document.getElementById('layer_type').value;
                     var technique_id = line.split(":")[1];
-                    technics.add(technique_id);
+                    if (layer_type === "ics") {
+                        if (Object.keys(techniques_association).includes(technique_id)) {
+                            technique_id = techniques_association[technique_id].ics;
+                        } else {
+                            technique_id = null;
+                        }
+                    } else if (layer_type === "mobile") {
+                        if (Object.keys(techniques_association).includes(technique_id)) {
+                            technique_id = techniques_association[technique_id].mobile;
+                        } else {
+                            technique_id = null;
+                        }
+                    }
+                    if (technique_id) {
+                        technics.add(technique_id);
+                    }
                 }
                 techniques_data[technique]["techniques"] = Array.from(technics);
             });
@@ -569,11 +641,12 @@
 
         window.addEventListener('resize', chart.resize);
 
-        // set list of CVEs in the URL
+        // set list of CVEs in the URL and the layer type
         var cves = document.getElementById('cves').innerText.trim().replace(/\n/g, ',');
+        var layer_type = document.getElementById('layer_type').value;
         var cves_gzip = await compress(cves, 'gzip');
         var cves_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(cves_gzip)));
-        history.pushState({}, '', `?input=${cves_b64}`);
+        history.pushState({}, '', `?layer=${layer_type}&input=${cves_b64}`);
 
 
         await create_mitre_layer();
@@ -584,12 +657,10 @@
                 title: 'Some CVEs not found',
                 text: 'The following CVEs were not found in the database: ' + cves_not_found.join(', '),
             });
-            return;
         }
 
         chart.hideLoading();
 
-        create_mitre_layer();
         print_mitre();
     }
 
@@ -600,6 +671,10 @@
         // Get the list of techniques, some node.to maybe null
         var techniques_list = data_cleaned.filter(node => node.target !== null);
         var max_score = 0;
+        var layer_type = document.getElementById('layer_type').value;
+        var enterprise_plateform = ["Windows", "Linux", "macOS", "Network", "PRE", "Containers", "Office 365", "SaaS", "Google Workspace", "IaaS", "Azure AD"];
+        var mobile_plateform = ["Android", "iOS"];
+        var ics_plateform = ["None"];
 
 
         for (var i = 0; i < techniques_list.length; i++) {
@@ -640,22 +715,10 @@
                 "navigator": "5.1.0",
                 "layer": "4.5"
             },
-            "domain": "enterprise-attack",
+            "domain": layer_type + "-attack",
             "description": "",
             "filters": {
-                "platforms": [
-                    "Windows",
-                    "Linux",
-                    "macOS",
-                    "Network",
-                    "PRE",
-                    "Containers",
-                    "Office 365",
-                    "SaaS",
-                    "Google Workspace",
-                    "IaaS",
-                    "Azure AD"
-                ]
+                "platforms": layer_type === "enterprise" ? enterprise_plateform : layer_type === "mobile" ? mobile_plateform : ics_plateform,
             },
             "sorting": 3,
             "layout": {

@@ -2102,5 +2102,640 @@
     ],
     "T1220": [
         "Defense Evasion"
+    ],
+    "T1626": [
+        "Privilege Escalation"
+    ],
+    "T1517": [
+        "Collection",
+        "Credential Access"
+    ],
+    "T1640": [
+        "Impact"
+    ],
+    "T1638": [
+        "Collection"
+    ],
+    "T1437": [
+        "Command and Control"
+    ],
+    "T1661": [
+        "Defense Evasion",
+        "Initial Access"
+    ],
+    "T1532": [
+        "Collection"
+    ],
+    "T1521.002": [
+        "Command and Control"
+    ],
+    "T1429": [
+        "Collection"
+    ],
+    "T1481.002": [
+        "Command and Control"
+    ],
+    "T1398": [
+        "Persistence"
+    ],
+    "T1624.001": [
+        "Persistence"
+    ],
+    "T1636.001": [
+        "Collection"
+    ],
+    "T1616": [
+        "Collection",
+        "Command and Control",
+        "Impact"
+    ],
+    "T1636.002": [
+        "Collection"
+    ],
+    "T1414": [
+        "Collection",
+        "Credential Access"
+    ],
+    "T1632.001": [
+        "Defense Evasion"
+    ],
+    "T1623": [
+        "Execution"
+    ],
+    "T1577": [
+        "Persistence"
+    ],
+    "T1645": [
+        "Persistence"
+    ],
+    "T1474.002": [
+        "Initial Access"
+    ],
+    "T1474.001": [
+        "Initial Access"
+    ],
+    "T1474.003": [
+        "Initial Access"
+    ],
+    "T1628.003": [
+        "Defense Evasion"
+    ],
+    "T1636.003": [
+        "Collection"
+    ],
+    "T1634": [
+        "Credential Access"
+    ],
+    "T1662": [
+        "Impact"
+    ],
+    "T1471": [
+        "Impact"
+    ],
+    "T1641": [
+        "Impact"
+    ],
+    "T1533": [
+        "Collection"
+    ],
+    "T1481.001": [
+        "Command and Control"
+    ],
+    "T1626.001": [
+        "Privilege Escalation"
+    ],
+    "T1629.002": [
+        "Defense Evasion"
+    ],
+    "T1629.003": [
+        "Defense Evasion"
+    ],
+    "T1630.003": [
+        "Defense Evasion"
+    ],
+    "T1637.001": [
+        "Command and Control"
+    ],
+    "T1407": [
+        "Defense Evasion"
+    ],
+    "T1456": [
+        "Initial Access"
+    ],
+    "T1637": [
+        "Command and Control"
+    ],
+    "T1521": [
+        "Command and Control"
+    ],
+    "T1642": [
+        "Impact"
+    ],
+    "T1624": [
+        "Persistence"
+    ],
+    "T1627": [
+        "Defense Evasion"
+    ],
+    "T1639": [
+        "Exfiltration"
+    ],
+    "T1646": [
+        "Exfiltration"
+    ],
+    "T1639.001": [
+        "Exfiltration"
+    ],
+    "T1658": [
+        "Execution"
+    ],
+    "T1664": [
+        "Initial Access"
+    ],
+    "T1404": [
+        "Privilege Escalation"
+    ],
+    "T1428": [
+        "Lateral Movement"
+    ],
+    "T1630.002": [
+        "Defense Evasion"
+    ],
+    "T1420": [
+        "Discovery"
+    ],
+    "T1541": [
+        "Defense Evasion",
+        "Persistence"
+    ],
+    "T1417.002": [
+        "Collection",
+        "Credential Access"
+    ],
+    "T1643": [
+        "Impact"
+    ],
+    "T1627.001": [
+        "Defense Evasion"
+    ],
+    "T1628": [
+        "Defense Evasion"
+    ],
+    "T1625": [
+        "Persistence"
+    ],
+    "T1617": [
+        "Defense Evasion"
+    ],
+    "T1629": [
+        "Defense Evasion"
+    ],
+    "T1430.002": [
+        "Collection",
+        "Discovery"
+    ],
+    "T1630": [
+        "Defense Evasion"
+    ],
+    "T1544": [
+        "Command and Control"
+    ],
+    "T1417": [
+        "Collection",
+        "Credential Access"
+    ],
+    "T1516": [
+        "Defense Evasion",
+        "Impact"
+    ],
+    "T1422.001": [
+        "Discovery"
+    ],
+    "T1634.001": [
+        "Credential Access"
+    ],
+    "T1417.001": [
+        "Collection",
+        "Credential Access"
+    ],
+    "T1430": [
+        "Collection",
+        "Discovery"
+    ],
+    "T1461": [
+        "Initial Access"
+    ],
+    "T1655": [
+        "Defense Evasion"
+    ],
+    "T1655.001": [
+        "Defense Evasion"
+    ],
+    "T1575": [
+        "Defense Evasion",
+        "Execution"
+    ],
+    "T1464": [
+        "Impact"
+    ],
+    "T1423": [
+        "Discovery"
+    ],
+    "T1509": [
+        "Command and Control"
+    ],
+    "T1406": [
+        "Defense Evasion"
+    ],
+    "T1481.003": [
+        "Command and Control"
+    ],
+    "T1644": [
+        "Command and Control"
+    ],
+    "T1660": [
+        "Initial Access"
+    ],
+    "T1629.001": [
+        "Defense Evasion"
+    ],
+    "T1424": [
+        "Discovery"
+    ],
+    "T1631": [
+        "Defense Evasion",
+        "Privilege Escalation"
+    ],
+    "T1636": [
+        "Collection"
+    ],
+    "T1604": [
+        "Defense Evasion"
+    ],
+    "T1631.001": [
+        "Defense Evasion",
+        "Privilege Escalation"
+    ],
+    "T1663": [
+        "Command and Control"
+    ],
+    "T1430.001": [
+        "Collection",
+        "Discovery"
+    ],
+    "T1458": [
+        "Initial Access",
+        "Lateral Movement"
+    ],
+    "T1582": [
+        "Impact"
+    ],
+    "T1636.004": [
+        "Collection"
+    ],
+    "T1521.003": [
+        "Command and Control"
+    ],
+    "T1603": [
+        "Execution",
+        "Persistence"
+    ],
+    "T1513": [
+        "Collection"
+    ],
+    "T1418.001": [
+        "Discovery"
+    ],
+    "T1418": [
+        "Discovery"
+    ],
+    "T1406.002": [
+        "Defense Evasion"
+    ],
+    "T1635": [
+        "Credential Access"
+    ],
+    "T1406.001": [
+        "Defense Evasion"
+    ],
+    "T1409": [
+        "Collection"
+    ],
+    "T1632": [
+        "Defense Evasion"
+    ],
+    "T1474": [
+        "Initial Access"
+    ],
+    "T1628.001": [
+        "Defense Evasion"
+    ],
+    "T1521.001": [
+        "Command and Control"
+    ],
+    "T1633.001": [
+        "Defense Evasion"
+    ],
+    "T1426": [
+        "Discovery"
+    ],
+    "T1422": [
+        "Discovery"
+    ],
+    "T1421": [
+        "Discovery"
+    ],
+    "T1625.001": [
+        "Persistence"
+    ],
+    "T1641.001": [
+        "Impact"
+    ],
+    "T1635.001": [
+        "Credential Access"
+    ],
+    "T1630.001": [
+        "Defense Evasion"
+    ],
+    "T1623.001": [
+        "Execution"
+    ],
+    "T1628.002": [
+        "Defense Evasion"
+    ],
+    "T1512": [
+        "Collection"
+    ],
+    "T1633": [
+        "Defense Evasion"
+    ],
+    "T1437.001": [
+        "Command and Control"
+    ],
+    "T1481": [
+        "Command and Control"
+    ],
+    "T1422.002": [
+        "Discovery"
+    ],
+    "T0800": [
+        "Inhibit Response Function"
+    ],
+    "T0830": [
+        "Collection"
+    ],
+    "T0878": [
+        "Inhibit Response Function"
+    ],
+    "T0802": [
+        "Collection"
+    ],
+    "T0895": [
+        "Execution"
+    ],
+    "T0803": [
+        "Inhibit Response Function"
+    ],
+    "T0804": [
+        "Inhibit Response Function"
+    ],
+    "T0805": [
+        "Inhibit Response Function"
+    ],
+    "T0806": [
+        "Impair Process Control"
+    ],
+    "T0892": [
+        "Inhibit Response Function"
+    ],
+    "T0858": [
+        "Evasion",
+        "Execution"
+    ],
+    "T0807": [
+        "Execution"
+    ],
+    "T0885": [
+        "Command and Control"
+    ],
+    "T0884": [
+        "Command and Control"
+    ],
+    "T0879": [
+        "Impact"
+    ],
+    "T0809": [
+        "Inhibit Response Function"
+    ],
+    "T0811": [
+        "Collection"
+    ],
+    "T0893": [
+        "Collection"
+    ],
+    "T0812": [
+        "Lateral Movement"
+    ],
+    "T0813": [
+        "Impact"
+    ],
+    "T0814": [
+        "Inhibit Response Function"
+    ],
+    "T0815": [
+        "Impact"
+    ],
+    "T0868": [
+        "Collection"
+    ],
+    "T0816": [
+        "Inhibit Response Function"
+    ],
+    "T0817": [
+        "Initial Access"
+    ],
+    "T0871": [
+        "Execution"
+    ],
+    "T0819": [
+        "Initial Access"
+    ],
+    "T0820": [
+        "Evasion"
+    ],
+    "T0890": [
+        "Privilege Escalation"
+    ],
+    "T0866": [
+        "Initial Access",
+        "Lateral Movement"
+    ],
+    "T0822": [
+        "Initial Access"
+    ],
+    "T0823": [
+        "Execution"
+    ],
+    "T0891": [
+        "Lateral Movement",
+        "Persistence"
+    ],
+    "T0874": [
+        "Execution",
+        "Privilege Escalation"
+    ],
+    "T0877": [
+        "Collection"
+    ],
+    "T0872": [
+        "Evasion"
+    ],
+    "T0883": [
+        "Initial Access"
+    ],
+    "T0867": [
+        "Lateral Movement"
+    ],
+    "T0826": [
+        "Impact"
+    ],
+    "T0827": [
+        "Impact"
+    ],
+    "T0828": [
+        "Impact"
+    ],
+    "T0837": [
+        "Impact"
+    ],
+    "T0880": [
+        "Impact"
+    ],
+    "T0829": [
+        "Impact"
+    ],
+    "T0835": [
+        "Inhibit Response Function"
+    ],
+    "T0831": [
+        "Impact"
+    ],
+    "T0832": [
+        "Impact"
+    ],
+    "T0849": [
+        "Evasion"
+    ],
+    "T0838": [
+        "Inhibit Response Function"
+    ],
+    "T0821": [
+        "Execution"
+    ],
+    "T0836": [
+        "Impair Process Control"
+    ],
+    "T0889": [
+        "Persistence"
+    ],
+    "T0839": [
+        "Impair Process Control",
+        "Persistence"
+    ],
+    "T0801": [
+        "Collection"
+    ],
+    "T0834": [
+        "Execution"
+    ],
+    "T0840": [
+        "Discovery"
+    ],
+    "T0842": [
+        "Discovery"
+    ],
+    "T0861": [
+        "Collection"
+    ],
+    "T0843": [
+        "Lateral Movement"
+    ],
+    "T0845": [
+        "Collection"
+    ],
+    "T0873": [
+        "Persistence"
+    ],
+    "T0886": [
+        "Initial Access",
+        "Lateral Movement"
+    ],
+    "T0846": [
+        "Discovery"
+    ],
+    "T0888": [
+        "Discovery"
+    ],
+    "T0847": [
+        "Initial Access"
+    ],
+    "T0848": [
+        "Initial Access"
+    ],
+    "T0851": [
+        "Evasion",
+        "Inhibit Response Function"
+    ],
+    "T0852": [
+        "Collection"
+    ],
+    "T0853": [
+        "Execution"
+    ],
+    "T0881": [
+        "Inhibit Response Function"
+    ],
+    "T0865": [
+        "Initial Access"
+    ],
+    "T0856": [
+        "Evasion",
+        "Impair Process Control"
+    ],
+    "T0869": [
+        "Command and Control"
+    ],
+    "T0862": [
+        "Initial Access"
+    ],
+    "T0894": [
+        "Evasion"
+    ],
+    "T0857": [
+        "Inhibit Response Function",
+        "Persistence"
+    ],
+    "T0882": [
+        "Impact"
+    ],
+    "T0864": [
+        "Initial Access"
+    ],
+    "T0855": [
+        "Impair Process Control"
+    ],
+    "T0863": [
+        "Execution"
+    ],
+    "T0859": [
+        "Lateral Movement",
+        "Persistence"
+    ],
+    "T0860": [
+        "Initial Access"
+    ],
+    "T0887": [
+        "Collection",
+        "Discovery"
     ]
 }
