@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify/dist/simple-notify.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify/dist/simple-notify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src=" https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js "></script>
@@ -172,7 +175,6 @@
 
         @media (max-width: 991px) {
             .process {
-                height: 100px;
                 margin-bottom: 2%;
             }
 
@@ -230,12 +232,13 @@
             </div>
             <div class="col-lg-2 col-md-12 d-flex align-items-center process">
                 <div class="row mx-auto process-row" style="padding-right: 4%;">
-                    <a href="#" class="btn btn-primary mx-auto" onclick="process()">2. Generate<br/>MITRE ATT&CK</a>
+                    <button type="button" class="btn btn-primary mx-auto" onclick="process()">2. Generate<br/>MITRE ATT&CK</button>
                     <select id="layer_type" class="form-select mt-2 text-center bg-secondary-subtle">
                         <option value="enterprise">Enterprise</option>
                         <option value="mobile">Mobile</option>
                         <option value="ics">ICS</option>
                     </select>
+                    <button type="button" class="btn btn-outline-secondary mx-auto mt-2" onclick="share()">Share current config</button>
                 </div>
             </div>
             <div class="col-lg-7 col-md-12 position-relative bg-white">
@@ -245,18 +248,45 @@
     </div>
     <div style="height: 100%; position: relative;" id="frame" hidden>
     </div>
-
-            
+    <div class="modal fade" role="dialog" id="modal" tabindex="-1" aria-labelledby="modal">
+        <div class="modal-dialog" role="document" style="max-width: 100%; margin: 2%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sub graph for selected Techniques</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div id="subgraph" style="width: 100%; height: 100%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
     
 </body>
 
 <script>
-    var metrics = {"CWE": {}, "CAPEC": {}, "TECHNIQUES": {}};
     var data_cleaned = [];
     var chart = echarts.init(document.getElementById('container'), null, {
             renderer: 'canvas',
             useDirtyRect: false
         });
+    var modal_chart = echarts.init(document.getElementById('subgraph'), null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+    window.addEventListener('resize', modal_chart.resize);
+    window.addEventListener('resize', chart.resize);
+    document.getElementById('modal').addEventListener('shown.bs.modal', function () {
+        modal_chart.resize();
+    });
+    var chart_nodes = [];
+    var chart_links = [];
+    var selected_techniques = [];
 
     // Avoid Copy/Paste formatting in contenteditable div
     document.querySelector('[contenteditable]').addEventListener('paste', function (event) {
@@ -308,15 +338,16 @@
         var url_params = new URLSearchParams(window.location.search);
         var cves_param = url_params.get('input');
         var layer_param = url_params.get('layer');
+        if (layer_param) {
+            document.getElementById('layer_type').value = layer_param;
+        }
         if (cves_param) {
             var cves_b64 = atob(cves_param);
             var cves_gzip = new Uint8Array(cves_b64.split('').map(c => c.charCodeAt(0)));
             var cves = await decompress(cves_gzip, 'gzip');
             document.getElementById('cves').innerText = cves.replace(/,/g, '\n');
-            await process();
-        }
-        if (layer_param) {
-            document.getElementById('layer_type').value = layer_param;
+
+            await process(true);
         }
     }
 
@@ -342,21 +373,21 @@
     }
 
 
-    async function process() {
+    async function process(page_load = false) {
 
         // clear all data are not CVE-XXXX-XXXX format
-        var cves = document.getElementById('cves').innerText.trim();
-        var cves_array = cves.split('\n').map(cve => cve.trim()).filter(cve => cve !== '');
-        var cves_cleaned = cves_array.filter(cve => cve.match(/^CVE-\d{4}-\d{4,}$/));
-        document.getElementById('cves').innerText = cves_cleaned.join('\n');
+        var cvesElement = document.getElementById('cves');
 
-        chart.showLoading();
-
-        data_cleaned = [];
-        metrics = {"CWE": {}, "CAPEC": {}, "TECHNIQUES": {}};
-        var cves_not_found = [];
         var cves = document.getElementById('cves').innerText.trim();
+        var cvesArray = cves.split('\n').map(cve => cve.trim()).filter(cve => /^CVE-\d{4}-\d{4,}$/.test(cve));
+        cves = cvesArray.join('\n');
+        cvesElement.innerText = cves;
+
         if (!cves) {
+            if (page_load) { // Do not show the alert if it's not a page load
+                chart.hideLoading();
+                return;
+            }
             Swal.fire({
                 icon: 'warning',
                 title: 'No CVEs found',
@@ -366,44 +397,60 @@
             return;
         }
 
-        var techniques_association;
+        chart.showLoading();
 
-        try {
-            techniques_association = await fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/techniques_association.json').then(res => res.text());
-            techniques_association = JSON.parse(techniques_association);
-        } catch (error) {
+        const [techniquesAssoc, cweDataRaw, capecDataRaw] = await Promise.all([
+            fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/techniques_association.json').then(res => res.json()),
+            fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/cwe_db.json').then(res => res.json()),
+            fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/capec_db.json').then(res => res.json())
+        ]).catch(error => {
             console.error(error);
             Swal.fire({
                 icon: 'error',
                 title: 'An error occurred',
-                text: 'Failed to fetch the Techniques association database',
+                text: 'Failed to fetch required databases',
             });
             chart.hideLoading();
             return;
-        }
+        });
 
-        var cves_array = cves.split('\n').map(cve => cve.trim()).filter(cve => cve !== '');
+
+
+        data_cleaned = new Set();
+        var cves_not_found = [];
+
+        var techniques_association;
 
         // Group by year
-        var cves_list = {};
-        for (var i = 0; i < cves_array.length; i++) {
-            var cve = cves_array[i];
-            var year = cve.split('-')[1];
-            if (year) {
-                if (!cves_list[year]) {
-                    cves_list[year] = [];
-                }
-                cves_list[year].push(cve);
-            }
-        }
+        var cves_list = cvesArray.reduce((acc, cve) => {
+            const year = cve.split('-')[1];
+            (acc[year] = acc[year] || []).push(cve);
+            return acc;
+        }, {});
 
         var data = [];
 
-        for (var year in cves_list) {
-            var cves = cves_list[year];
+        for (var [year, yearCves] of Object.entries(cves_list)) {
+            var database;
             try {
                 var response = await fetch(`https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/database/CVE-${year}.jsonl`);
                 var responseText = await response.text();
+                database = Object.fromEntries(responseText.split('\n').map(line => {
+                    if (line.trim()) {
+                        try {
+                            var parsed = JSON.parse(line);
+                            var key = Object.keys(parsed)[0];
+                            var value = parsed[key];
+                            // Check if parses is a valid JSON object
+                            if (key && value) {
+                                return [key, value];
+                            }
+                        } catch (parseError) {
+                            console.error('Error parsing JSON line:', line);
+                        }
+                    }
+                    return null; // Return null if the line is empty or not a valid JSON
+                }).filter(Boolean)); // Filter out null values
             } catch (error) {
                 console.error(error);
                 Swal.fire({
@@ -414,139 +461,61 @@
                 continue; // Skip this year if there is an error
             }
 
-            // Parse JSONL file content
-            var database = {};
-            responseText.split('\n').forEach(line => {
-                if (line.trim()) {
-                    try {
-                        var data = JSON.parse(line);
-                        database[Object.keys(data)[0]] = data[Object.keys(data)[0]];
-                    } catch (parseError) {
-                        console.error('Error parsing JSON line:', line);
-                    }
-                }
-            });
-            
-            try {
-                var [cwe_data, capec_data_raw] = await Promise.all([
-                    fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/cwe_db.json').then(res => res.text()),
-                    fetch('https://raw.githubusercontent.com/Galeax/CVE2CAPEC/refs/heads/main/resources/capec_db.json').then(res => res.text())
-                ]);
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'An error occurred',
-                    text: 'Failed to fetch the CWE or CAPEC database',
-                });
-                return;
-            }
-            
-            capec_data_raw = JSON.parse(capec_data_raw);
-            var techniques_data = capec_data_raw;
-            Object.keys(capec_data_raw).forEach(technique => {
-                var technics = new Set();
-                var lines = capec_data_raw[technique]['techniques'].split("NAME:ATTACK:ENTRY ")
-                for (var i = 1; i < lines.length; i++) {
-                    var line = lines[i];
-                    var layer_type = document.getElementById('layer_type').value;
-                    var technique_id = line.split(":")[1];
-                    if (layer_type === "ics") {
-                        if (Object.keys(techniques_association).includes(technique_id)) {
-                            technique_id = techniques_association[technique_id].ics;
-                        } else {
-                            technique_id = null;
-                        }
-                    } else if (layer_type === "mobile") {
-                        if (Object.keys(techniques_association).includes(technique_id)) {
-                            technique_id = techniques_association[technique_id].mobile;
-                        } else {
-                            technique_id = null;
-                        }
-                    }
-                    if (technique_id) {
-                        technics.add(technique_id);
-                    }
-                }
-                techniques_data[technique]["techniques"] = Array.from(technics);
-            });
-
-            for (var i = 0; i < cves.length; i++) {
-                var cve = cves[i];
-                if (!database[cve]) {
+            yearCves.forEach(cve => {
+                var cveData = database[cve];
+                if (!cveData) {
                     cves_not_found.push(cve);
-                    continue;
+                    return;
                 }
-                var cwes = database[cve]['CWE'];
-                var capecs = database[cve]['CAPEC'];
-                var techniques = database[cve]['TECHNIQUES'];
-                for (var j = 0; j < cwes.length; j++) {
-                    var cwe = cwes[j];
-                    var node = {
-                        "source": cve,
-                        "target": "CWE-"+cwe,
-                        "value": 1
-                    };
-                    data.push(node);
-                    var capec_data = JSON.parse(cwe_data)
-                    if (capec_data[cwe]) {
-                        var capecs = capec_data[cwe]["RelatedAttackPatterns"];
-                        if (capecs.length > 0) {
-                            for (var k = 0; k < capecs.length; k++) {
-                                var capec = capecs[k];
-                                var node = {
-                                    "source": "CWE-"+cwe,
-                                    "target": "CAPEC-"+capec,
-                                    "value": 1
-                                };                                
-                                data.push(node);
-                                if (techniques_data[capec]) {
-                                    var techniques = techniques_data[capec]["techniques"];
-                                    if (techniques.length > 0) {
-                                        for (var l = 0; l < techniques.length; l++) {
-                                            var technique = techniques[l];
-                                            var node = {
-                                                "source": "CAPEC-"+capec,
-                                                "target": "T"+technique,
-                                                "value": 1
-                                            };
-                                            data.push(node);
-                                        }
-                                    } 
-                                }
+                
+                cveData.CWE.forEach(cwe => {
+                    data.push({source: cve, target: 'CWE-' + cwe, value: 1});
+                    var relatedCapecs = cweDataRaw[cwe]?.RelatedAttackPatterns || [];
+                    relatedCapecs.forEach(capec => {
+                        data.push({source: 'CWE-' + cwe, target: 'CAPEC-' + capec, value: 1});
+                        var lines = capecDataRaw[capec]?.techniques.split("NAME:ATTACK:ENTRY ")
+                        var relatedTechniques = new Set()
+                        for (var i = 1; i < lines.length; i++) {
+                            var technique_id = lines[i].split(":")[1];
+                            if (layer_type.value === "ics") {
+                                technique_id = techniquesAssoc[technique_id]?.ics;
+                            } else if (layer_type.value === "mobile") {
+                                technique_id = techniquesAssoc[technique_id]?.mobile;
                             }
-                        } 
-                    }
-                }            
-            }
+                            if (technique_id) {
+                                relatedTechniques.add(technique_id);
+                            }
+                        }
+                        relatedTechniques.forEach(technique => {
+                            data.push({source: 'CAPEC-' + capec, target: 'T' + technique, value: 1});
+                        });
+                    });
+                })
+            })
         }
-        // Remove duplicates
-        for (var i = 0; i < data.length; i++) {
-            var node = data[i];
-            var found = false;
-            for (var j = 0; j < data_cleaned.length; j++) {
-                var node2 = data_cleaned[j];
-                if (node.source === node2.source && node.target === node2.target) {
-                    node2.value++;
-                    found = true;
-                    break;
+
+        data.forEach(node => {
+            key = node.source;
+            if (!data_cleaned.has(key)) {
+                data_cleaned.add(key);
+            } else {
+                var existingNode = Array.from(data_cleaned).find(n => n.source === node.source && n.target === node.target);
+                if (existingNode) {
+                    existingNode.value++;
                 }
             }
-            if (!found) {
-                data_cleaned.push(node);
-            }
-        }
+        });
 
-        var nodes = [];
-        for (var i = 0; i < data_cleaned.length; i++) {
-            var node = data_cleaned[i];
-            if (!nodes.includes(node.source)) {
-                nodes.push(node.source);
-            }
-            if (!nodes.includes(node.target)) {
-                nodes.push(node.target);
-            }
-        }
+        var chartNodes = new Set();
+        data.forEach(link => {
+            chartNodes.add(link.source);
+            chartNodes.add(link.target);
+        });
+        var chartLinks = Array.from(data);
 
+        chart_nodes = Array.from(chartNodes).map(node => ({name: node}))
+        chart_links = data
+   
         var option = {
             tooltip: {
                     trigger: 'item',
@@ -558,11 +527,11 @@
                         if (params.dataType === 'node') {
                             let nodeName = params.data.name;
                             let nodeValue = params.value || 'N/A';
-                            let incomingNodes = data_cleaned
+                            let incomingNodes = data
                                 .filter(link => link.target === nodeName)
                                 .map(link => link.source)
                                 .join('<br/>- ');
-                            let outgoingNodes = data_cleaned
+                            let outgoingNodes = data
                                 .filter(link => link.source === nodeName)
                                 .map(link => link.target)
                                 .join('<br/>- ');
@@ -613,7 +582,7 @@
             series: {
                 type: 'sankey',
                 emphasis: {
-                    focus: 'adjacency',
+                    focus: 'trajectory',
                 },
                 nodeAlign: 'center',
                 nodeWidth: 20,  // Largeur des nœuds pour réduire l'encombrement
@@ -622,12 +591,8 @@
                 label: {
                     fontSize: 12, // Taille de police réduite
                 },
-                data: nodes.map(node => {
-                    return {
-                        name: node
-                    };
-                }),
-                links: data_cleaned,
+                data: chart_nodes,
+                links: chart_links,
                 lineStyle: {
                     color: 'source',
                     curveness: 0.5
@@ -638,16 +603,8 @@
         if (option && typeof option === 'object') {
             chart.setOption(option);
         }
-
-        window.addEventListener('resize', chart.resize);
-
-        // set list of CVEs in the URL and the layer type
-        var cves = document.getElementById('cves').innerText.trim().replace(/\n/g, ',');
-        var layer_type = document.getElementById('layer_type').value;
-        var cves_gzip = await compress(cves, 'gzip');
-        var cves_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(cves_gzip)));
-        history.pushState({}, '', `?layer=${layer_type}&input=${cves_b64}`);
-
+        var cvesUrlEncoded = btoa(String.fromCharCode.apply(null, new Uint8Array(await compress(cvesArray.join(','), 'gzip'))));
+        history.pushState({}, '', `?layer=${document.getElementById('layer_type').value}&input=${cvesUrlEncoded}`);
 
         await create_mitre_layer();
 
@@ -669,7 +626,7 @@
         var data_layer = {};
         
         // Get the list of techniques, some node.to maybe null
-        var techniques_list = data_cleaned.filter(node => node.target !== null);
+        var techniques_list = chart.getOption().series[0].links;
         var max_score = 0;
         var layer_type = document.getElementById('layer_type').value;
         var enterprise_plateform = ["Windows", "Linux", "macOS", "Network", "PRE", "Containers", "Office 365", "SaaS", "Google Workspace", "IaaS", "Azure AD"];
@@ -848,15 +805,46 @@
             var iframeDoc = iframe.contentWindow.document;
 
             // Créer le bouton dynamiquement
-            var button = iframeDoc.createElement('button');
+            var div = iframeDoc.createElement('div');
+            var div_sub_graph = iframeDoc.createElement('div');
 
-            button.innerHTML = '<svg class="toggle-fullscreen-svg frame-full" width="28" height="28" viewBox="-2 -2 28 28"><g class="icon-fullscreen-enter"><path d="M 2 9 v -7 h 7" /><path d="M 22 9 v -7 h -7" /><path d="M 22 15 v 7 h -7" /><path d="M 2 15 v 7 h 7" /></g><g class="icon-fullscreen-leave"><path d="M 24 17 h -7 v 7" /><path d="M 0 17 h 7 v 7" /><path d="M 0 7 h 7 v -7" /><path d="M 24 7 h -7 v -7" /></g></svg>';
-            button.className = "js-toggle-fullscreen-btn toggle-fullscreen-btn";
-            button.title = "Enter fullscreen mode";
-            button.onclick = function() {
+            var button_screen = iframeDoc.createElement('button');
+
+            button_screen.innerHTML = '<svg class="toggle-fullscreen-svg frame-full" width="28" height="28" viewBox="-2 -2 28 28"><g class="icon-fullscreen-enter"><path d="M 2 9 v -7 h 7" /><path d="M 22 9 v -7 h -7" /><path d="M 22 15 v 7 h -7" /><path d="M 2 15 v 7 h 7" /></g><g class="icon-fullscreen-leave"><path d="M 24 17 h -7 v 7" /><path d="M 0 17 h 7 v 7" /><path d="M 0 7 h 7 v -7" /><path d="M 24 7 h -7 v -7" /></g></svg>';
+            button_screen.className = "js-toggle-fullscreen-btn toggle-fullscreen-btn";
+            button_screen.title = "Enter fullscreen mode";
+            button_screen.onclick = function() {
                 parent.fullscreen();
             };
+
+            var button_sub_graph = iframeDoc.createElement('button');
+
+            button_sub_graph.type = "button";
+            button_sub_graph.innerHTML = "Generate Sub graph<br>for selected Techniques";
+            button_sub_graph.className = "btn btn-outline-secondary";
+            button_sub_graph.style = "margin-right: 5px; color: white; font-size: 9pt;";
+            button_sub_graph.onclick = function() {
+                parent.show_modal();
+            };
+
+            div_sub_graph.className = "mat-mdc-tooltip-trigger control-row-button noselect";
+            div_sub_graph.style = "display: inline-flex; margin-top: 5px;";
+
+            var button_unselect = iframeDoc.createElement('button');
+
+            button_unselect.type = "button";
+            button_unselect.className = "btn btn-outline-secondary";
+            button_unselect.style = "color: white; font-size: 9pt;";
+            button_unselect.innerHTML = "Unselect all";
+            button_unselect.onclick = function() {
+                iframeDoc.getElementsByClassName("mat-mdc-tooltip-trigger control-row-button noselect")[2].click();
+            };
+
             var style_balise = iframeDoc.createElement('style');
+            var bootstrap_style = iframeDoc.createElement('link');
+            bootstrap_style.rel = "stylesheet";
+            bootstrap_style.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css";
+            iframeDoc.head.appendChild(bootstrap_style);
             style_balise.innerHTML = `
                 .toggle-fullscreen-btn {
                     background: none;
@@ -898,21 +886,254 @@
                 }
             `;
             iframeDoc.head.appendChild(style_balise);
-            button.style = "position: absolute; top: 12px; right:50px;";
+            div.style = "position: absolute; top: 12px; right:50px;";
 
             waitForElm('.help-header').then((elm) => {
-                elm.appendChild(button);
+                div.appendChild(button_screen);
+                elm.appendChild(div); 
+            });
+            waitForElm('.control-sections').then((elm) => {
+                // ajoute un style à elm
+                elm.style = elm.style + "margin-top: 5px;";
+                var li_sub_graph = iframeDoc.createElement('li');
+                li_sub_graph.className = "ng-star-inserted";
+                div_sub_graph.appendChild(button_sub_graph);
+                div_sub_graph.appendChild(button_unselect);
+                li_sub_graph.appendChild(div_sub_graph);
+                // add tmp as first child of elm
+                elm.insertBefore(li_sub_graph, elm.firstChild);
             });
         };
     }
 
     async function example() {
-        document.getElementById('cves').innerText = 'CVE-2024-37079\nCVE-2024-22274\n';
+        document.getElementById('cves').innerText = 'CVE-2024-37079\nCVE-2018-17924';
         await process();
         await print_mitre();
     }
 
-    function fullscreen() {
+    // Function to display the selected techniques executed by iframe
+    // See L-5642 and from L-9336 in main.js
+    async function mitre_selection(techniques, selection=false, technique_id= null) {
+        var selected = new Set();
+        techniques.forEach(function(element) {
+            var technique = element.split('^')[0];
+            selected.add(technique);
+        });
+        selected_techniques = Array.from(selected);
+        show_selected(selection, technique_id);
+    }
+
+    async function show_selected(selection, technique_id) {
+        var data_link = new Set();
+        var nodes = new Set();
+
+        var option = {
+            tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove',
+                    textStyle: {
+                        fontSize: 12
+                    },
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            let nodeName = params.data.name;
+                            let nodeValue = params.value || 'N/A';
+                            let incomingNodes = chart_links
+                                .filter(link => link.target === nodeName)
+                                .map(link => link.source)
+                                .join('<br/>- ');
+                            let outgoingNodes = chart_links
+                                .filter(link => link.source === nodeName)
+                                .map(link => link.target)
+                                .join('<br/>- ');
+                            
+                                var ret = `<b>${nodeName} (${nodeValue})</b><hr class="hr-tooltip" />`;
+                            if (incomingNodes) {
+                                ret += `<u>From:</u><br>- ${incomingNodes}<br>`;
+                            }
+                            if (outgoingNodes) {
+                                ret += `<u>To:</u><br>- ${outgoingNodes}`;
+                            }
+                            return ret;
+                        } else {
+                            return `${params.data.source} → ${params.data.target}: ${params.data.value}`;
+                        }
+                    }
+                },
+            annimation: false,
+            toolbox: {
+                show: true,
+                feature: {
+                    saveAsImage: {
+                        show: true,
+                        title: 'Save as image',
+                        type: 'png',
+                        name: 'CVE2CAPEC - Sub Graph Data Flow',
+                        backgroundColor: '#fff',
+                    },
+                    restore: {
+                        show: true,
+                        title: 'Restore',
+                    },
+                    myFullScreen: {
+                        show: true,
+                        title: 'Plein Écran',
+                        icon: 'image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAACvUlEQVR4nO3dTW7TUBQF4MeP2AJjkAAJKIxYAIvINqL4nHrsFUEpqFL52wRsggmCYgQtIAU94QGqSFLa93xukvNJHuf43Loe+MpOyczMzMzMzMzMbEORnFc+jgA8n81m92qdw+7u7gOSr0ge1z6ftAEDmQ9H3zTNToX8jwCcjHUepfMrBzIH8LJC/ndjnkPp/OqBnEwmkyulsk+n0+tj5vdAVvBALv4XdpgKA/DeV8j5htGTvF96IE3TPCb5zf+yzn7f+Exyn+Td0sP4ayg7JN8A+L7x95C0ZajuQx4gGHkf8gDByPuQBwhG3oc8QDDyPuQBgpH3IQ8QjLwPeYBg5H3IAwQj70MeIBh5H/IAwcj7kAcIRt6HPEAw8j7kAYKR9yEPEIy8D3mAYOR9DA+QFgX4lLYMyQ+L+gDwpXqAvMS2ZCD7acsAeLKkj73qAfJG4fC8+/SP9zW3DaNq2/ZWvhIW9HFzlBD5mXReYiP5Y9gCPKyxkLAu2ra9A+Dt0MdPAK+bpnk4epC8xFZykW3ddV13reu6q+ocZmZmZmZmZmZmZmZmZmZmdkp+oO8lhwB9ALidV11I/sqHbO0lCGkf+YcWLcrVeANcdPI+SB4sWZ18kbYM1X0A+LokQJ+2DNR9yNfvg5H3IQ8QjLwPeYBg5H3IAwQj70MeIBh5H/IAwcj7kAcIRt6HPEAw8j7kAYKR9yEPEIy8D3mAYOR9yAMEI+9DHiAYeR/yAMHI+5AHCEbehzxAMPI+VgUocPQAntZ8T0h+J8vwEp2j2ueTNmAg83zk10DVGMrw7ZB/PQP3QM5QwkHpgQzfLxxlGBt1hfDPcdx13eVS2fPOVH5jjwdygYGklC55IEGuEADPUmHDe778L+scJXzMG4GlB+Kb+v8Poh++0nYjVZK/AJd/Y8ULPdfjpm5mZmZmZmZmqZ7frkDXeF36/ksAAAAASUVORK5CYII=',
+                        onclick: function () {
+                            if (document.fullscreenElement) {
+                                document.exitFullscreen();
+                            } else {
+                                document.getElementById('subgraph').requestFullscreen();
+                            }
+                        }
+                    }
+                }
+            },
+            backgroundColor: '#fff',
+            series: {
+                type: 'sankey',
+                emphasis: {
+                    focus: 'trajectory',
+                },
+                nodeAlign: 'center',
+                nodeWidth: 20,  // Largeur des nœuds pour réduire l'encombrement
+                nodeGap: 5,    // Ajustement de l'espace entre les nœuds
+                layoutIterations: 64, // Nombre d'itérations pour le calcul de la disposition
+                label: {
+                    fontSize: 12, // Taille de police réduite
+                },
+                data: [],
+                links: [],
+                lineStyle: {
+                    color: 'source',
+                    curveness: 0.5
+                }
+            }
+        }
+        if (option && typeof option === 'object') {
+            modal_chart.setOption(option);
+        }
+
+        // Get CAPEC and CWE data from Technoques
+        selected_techniques.forEach(technique => {
+            const capecs = new Set();
+            const cwes = new Set();
+
+            chart_links.forEach(element => {
+                if (element.target === technique) {
+                    data_link.add(element);
+                    capecs.add(element.source);
+                }
+            });
+
+            capecs.forEach(capec => {
+                chart_links.forEach(element => {
+                    if (element.target === capec) {
+                        data_link.add(element);
+                        cwes.add(element.source);
+                    }
+                });
+            });
+
+            cwes.forEach(cwe => {
+                chart_links.forEach(element => {
+                    if (element.target === cwe) {
+                        data_link.add(element);
+                    }
+                });
+            });
+        });
+
+        // Get all nodes from links
+        data_link.forEach(link => {
+            nodes.add(link.source);
+            nodes.add(link.target);
+        });
+
+        // If no data found, show a warning 
+        if (nodes.size === 0 || data_link.size === 0) {
+            if (selection && technique_id) {
+                new Notify({
+                    status: 'warning',
+                    title: technique_id,
+                    text: `No data found for ${technique_id}`,
+                    effect: 'fade',
+                    speed: 300,
+                    showIcon: true,
+                    showCloseButton: true,
+                    autoclose: true,
+                    autotimeout: 2000,
+                    type: 'outline',
+                    position: 'right top'
+                });
+            }
+            modal_chart.setOption({
+                series: {
+                    data: [],
+                    links: []
+                }
+            });
+        } else {
+            modal_chart.setOption({
+                series: {
+                    data: Array.from(nodes).map(node => ({ name: node })),
+                    links: Array.from(data_link)
+                }
+            });
+        }
+    }
+
+    async function show_modal() {
+        var modal = new bootstrap.Modal(document.getElementById('modal'));
+        var chart_option = modal_chart.getOption();
+        if (modal_chart.getOption().series[0].data.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No techniques selected',
+                text: 'Please select some techniques first.',
+            });
+            return;
+        }
+        modal.show();
+    }
+
+    async function share() {
+        // copy url to clipboard
+        var url = window.location.href;
+        navigator.clipboard.writeText(url).then(function() {
+            new Notify({
+                status: 'success',
+                title: 'URL copied',
+                text: 'The URL has been copied to the clipboard',
+                effect: 'fade',
+                speed: 300,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 2000,
+                type: 'outline',
+                position: 'right top'
+            });
+        }, function(err) {
+            console.error('Failed to copy: ', err);
+            new Notify({
+                status: 'error',
+                title: 'Failed to copy URL',
+                text: 'An error occurred while copying the URL',
+                effect: 'fade',
+                speed: 300,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 2000,
+                type: 'outline',
+                position: 'right top'
+            });
+        });
+    }
+
+    async function fullscreen() {
         // check if fullscreen mode is available
         if (document.fullscreenEnabled || 
             document.webkitFullscreenEnabled || 

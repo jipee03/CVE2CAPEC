@@ -8099,19 +8099,29 @@ class MatrixCommon {
     }
     if (event.shift || event.ctrl || event.meta) {
       // add to selection
-      if (this.viewModel.isTechniqueSelected(technique, tactic)) this.viewModel.unselectTechnique(technique, tactic);else this.viewModel.selectTechnique(technique, tactic);
+      if (this.viewModel.isTechniqueSelected(technique, tactic)) {
+        this.viewModel.unselectTechnique(technique, tactic);
+        parent.mitre_selection(this.viewModel.selectedTechniques, false, technique.attackID);
+      }
+      else {
+        this.viewModel.selectTechnique(technique, tactic);
+        parent.mitre_selection(this.viewModel.selectedTechniques, true, technique.attackID);
+      }
     } else {
       // replace selection
       if (this.viewModel.getSelectedTechniqueCount() > 1) {
         if (this.viewModel.isTechniqueSelected(technique, tactic)) this.viewModel.clearSelectedTechniques();
         this.viewModel.selectTechnique(technique, tactic);
+        parent.mitre_selection(this.viewModel.selectedTechniques, true, technique.attackID);
       } else if (this.viewModel.isTechniqueSelected(technique, tactic)) {
         //unselect currently selected
         this.viewModel.clearSelectedTechniques();
+        parent.mitre_selection(this.viewModel.selectedTechniques, false, technique.attackID);
       } else {
         //replace
         this.viewModel.clearSelectedTechniques();
         this.viewModel.selectTechnique(technique, tactic);
+        parent.mitre_selection(this.viewModel.selectedTechniques, true, technique.attackID);
       }
     }
     this.viewModelsService.onSelectionChange.emit();
@@ -9333,42 +9343,52 @@ class ContextmenuComponent extends _cell_popover__WEBPACK_IMPORTED_MODULE_0__.Ce
   select() {
     this.viewModel.clearSelectedTechniques();
     this.viewModel.selectTechnique(this.technique, this.tactic);
+    parent.mitre_selection(this.viewModel.selectedTechniques, true, this.technique.attackID);
     this.closeContextmenu();
   }
   addSelection() {
     this.viewModel.selectTechnique(this.technique, this.tactic);
+    parent.mitre_selection(this.viewModel.selectedTechniques, true, this.technique.attackID);
     this.closeContextmenu();
   }
   removeSelection() {
     this.viewModel.unselectTechnique(this.technique, this.tactic);
+    parent.mitre_selection(this.viewModel.selectedTechniques);
     this.closeContextmenu();
   }
   selectAll() {
     this.viewModel.selectAllTechniques();
+    parent.mitre_selection(this.viewModel.selectedTechniques, true);
     this.closeContextmenu();
   }
   deselectAll() {
     this.viewModel.clearSelectedTechniques();
+    parent.mitre_selection(this.viewModel.selectedTechniques);
     this.closeContextmenu();
   }
   invertSelection() {
     this.viewModel.invertSelection();
+    parent.mitre_selection(this.viewModel.selectedTechniques, true);
     this.closeContextmenu();
   }
   selectAnnotated() {
     this.viewModel.selectAnnotated();
+    parent.mitre_selection(this.viewModel.selectedTechniques, true);
     this.closeContextmenu();
   }
   selectUnannotated() {
     this.viewModel.selectUnannotated();
+    parent.mitre_selection(this.viewModel.selectedTechniques, true);
     this.closeContextmenu();
   }
   selectAllInTactic() {
     this.viewModel.selectAllTechniquesInTactic(this.tactic);
+    parent.mitre_selection(this.viewModel.selectedTechniques, true);
     this.closeContextmenu();
   }
   deselectAllInTactic() {
     this.viewModel.unselectAllTechniquesInTactic(this.tactic);
+    parent.mitre_selection(this.viewModel.selectedTechniques);
     this.closeContextmenu();
   }
   viewTechnique() {
