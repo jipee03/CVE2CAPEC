@@ -23,8 +23,8 @@
     ],
 
     "default_layers": {
-        "enabled": true,
-        "urls": ["CVE2CAPEC/mitre/assets/example.json"]
+        "enabled": false,
+        "urls": ["assets/example.json", "https://raw.githubusercontent.com/mitre-attack/attack-navigator/master/layers/samples/Bear_APT.json"]
     },
 
     "comment_color": "yellow",
