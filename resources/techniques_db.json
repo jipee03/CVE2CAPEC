@@ -89,6 +89,10 @@
         "Persistence",
         "Privilege Escalation"
     ],
+    "T1098.007": [
+        "Persistence",
+        "Privilege Escalation"
+    ],
     "T1098.005": [
         "Persistence",
         "Privilege Escalation"
@@ -151,6 +155,10 @@
         "Collection",
         "Credential Access"
     ],
+    "T1557.004": [
+        "Collection",
+        "Credential Access"
+    ],
     "T1557.001": [
         "Collection",
         "Credential Access"
@@ -165,6 +173,9 @@
         "Command and Control"
     ],
     "T1071.003": [
+        "Command and Control"
+    ],
+    "T1071.005": [
         "Command and Control"
     ],
     "T1071.001": [
@@ -345,6 +356,9 @@
     "T1059.007": [
         "Execution"
     ],
+    "T1059.011": [
+        "Execution"
+    ],
     "T1059.008": [
         "Execution"
     ],
@@ -478,6 +492,9 @@
     "T1485": [
         "Impact"
     ],
+    "T1485.001": [
+        "Impact"
+    ],
     "T1132": [
         "Command and Control"
     ],
@@ -545,6 +562,12 @@
         "Collection"
     ],
     "T1213.001": [
+        "Collection"
+    ],
+    "T1213.004": [
+        "Collection"
+    ],
+    "T1213.005": [
         "Collection"
     ],
     "T1213.002": [
@@ -750,6 +773,9 @@
         "Persistence",
         "Privilege Escalation"
     ],
+    "T1546.017": [
+        "Persistence"
+    ],
     "T1546.004": [
         "Persistence",
         "Privilege Escalation"
@@ -762,6 +788,9 @@
         "Defense Evasion"
     ],
     "T1480.001": [
+        "Defense Evasion"
+    ],
+    "T1480.002": [
         "Defense Evasion"
     ],
     "T1048": [
@@ -1111,6 +1140,9 @@
     "T1070.005": [
         "Defense Evasion"
     ],
+    "T1070.010": [
+        "Defense Evasion"
+    ],
     "T1070.006": [
         "Defense Evasion"
     ],
@@ -1174,6 +1206,9 @@
         "Defense Evasion"
     ],
     "T1036.001": [
+        "Defense Evasion"
+    ],
+    "T1036.010": [
         "Defense Evasion"
     ],
     "T1036.008": [
@@ -1260,6 +1295,9 @@
         "Defense Evasion"
     ],
     "T1578.004": [
+        "Defense Evasion"
+    ],
+    "T1666": [
         "Defense Evasion"
     ],
     "T1112": [
@@ -1375,6 +1413,9 @@
         "Defense Evasion"
     ],
     "T1027.012": [
+        "Defense Evasion"
+    ],
+    "T1027.014": [
         "Defense Evasion"
     ],
     "T1027.002": [
@@ -1637,6 +1678,18 @@
     "T1496": [
         "Impact"
     ],
+    "T1496.002": [
+        "Impact"
+    ],
+    "T1496.004": [
+        "Impact"
+    ],
+    "T1496.001": [
+        "Impact"
+    ],
+    "T1496.003": [
+        "Impact"
+    ],
     "T1207": [
         "Defense Evasion"
     ],
@@ -1792,6 +1845,9 @@
         "Credential Access"
     ],
     "T1558.004": [
+        "Credential Access"
+    ],
+    "T1558.005": [
         "Credential Access"
     ],
     "T1558.001": [
@@ -1957,6 +2013,9 @@
         "Exfiltration"
     ],
     "T1127": [
+        "Defense Evasion"
+    ],
+    "T1127.002": [
         "Defense Evasion"
     ],
     "T1127.001": [
