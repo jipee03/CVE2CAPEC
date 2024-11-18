@@ -774,7 +774,8 @@
         "Privilege Escalation"
     ],
     "T1546.017": [
-        "Persistence"
+        "Persistence",
+        "Privilege Escalation"
     ],
     "T1546.004": [
         "Persistence",
