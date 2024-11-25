@@ -4,6 +4,7 @@ from datetime import datetime
 from tqdm import tqdm
 from re import match
 import os
+import time
 
 API_CVES = "https://services.nvd.nist.gov/rest/json/cves/2.0/"
 API_KEY = os.environ.get("NVD_API_KEY")
@@ -11,12 +12,25 @@ UPDATE_FILE = "lastUpdate.txt"
 CVE_FILE = "results/new_cves.jsonl"
 
 
+def fetch_data_with_retries(session, url, retries=3, delay=3):
+    for attempt in range(1, retries + 1):
+        response = session.get(url)
+        if response.status_code == 200:
+            return response
+        elif 500 <= response.status_code < 600:
+            print(f"[-] Failed to download CVE data (attempt {attempt}/{retries}) - Error:{response.status_code}. Retrying in {delay}s...")
+            time.sleep(delay)
+        else:
+            raise Exception(f"Failed to download CVE data after {retries} attempts (status code: {response.status_code})")
+    raise Exception(f"Failed to download CVE data after {retries} attempts (status code: {response.status_code})")
+
+
 # Parse CVE data from the API
 def parse_cves(url: str):
     cve_data = {}
     session = requests.Session()
     session.headers.update({"apiKey": API_KEY})
-    response = session.get(url)
+    response = fetch_data_with_retries(session, url)
 
     if response.status_code != 200:
         raise Exception("Failed to download CVE data")
@@ -34,7 +48,7 @@ def parse_cves(url: str):
     # Process each page of the API response
     for page in tqdm(range(nb_pages), desc="Fetching pages", unit="Page"):
         url = f"{url}&resultsPerPage=2000&startIndex={page * 2000}"
-        response = session.get(url)
+        response = fetch_data_with_retries(session, url)
         if response.status_code != 200:
             raise Exception("Failed to download CVE data")
         cves = response.json()
