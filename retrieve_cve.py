@@ -12,25 +12,25 @@ UPDATE_FILE = "lastUpdate.txt"
 CVE_FILE = "results/new_cves.jsonl"
 
 
-def fetch_data_with_retries(session, url, retries=3, delay=3):
+def fetch_data_with_retries(session, url, retries=3, delay=5):
     for attempt in range(1, retries + 1):
         response = session.get(url)
         if response.status_code == 200:
             return response
         elif 500 <= response.status_code < 600:
-            print(f"[-] Failed to download CVE data (attempt {attempt}/{retries}) - Error:{response.status_code}. Retrying in {delay}s...")
-            time.sleep(delay)
+            print(f"[-] Failed to download CVE data (attempt {attempt}/{retries}) - Error:{response.status_code}. Retrying in {delay*attempt}s...")
+            time.sleep(delay*attempt)
         else:
             raise Exception(f"Failed to download CVE data after {retries} attempts (status code: {response.status_code})")
     raise Exception(f"Failed to download CVE data after {retries} attempts (status code: {response.status_code})")
 
 
 # Parse CVE data from the API
-def parse_cves(url: str):
+def parse_cves(url_base: str):
     cve_data = {}
     session = requests.Session()
     session.headers.update({"apiKey": API_KEY})
-    response = fetch_data_with_retries(session, url)
+    response = fetch_data_with_retries(session, url_base)
 
     if response.status_code != 200:
         raise Exception("Failed to download CVE data")
@@ -47,7 +47,7 @@ def parse_cves(url: str):
     
     # Process each page of the API response
     for page in tqdm(range(nb_pages), desc="Fetching pages", unit="Page"):
-        url = f"{url}&resultsPerPage=2000&startIndex={page * 2000}"
+        url = f"{url_base}&resultsPerPage=2000&startIndex={page * 2000}"
         response = fetch_data_with_retries(session, url)
         if response.status_code != 200:
             raise Exception("Failed to download CVE data")
