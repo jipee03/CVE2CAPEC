@@ -296,9 +296,6 @@
         "Persistence",
         "Privilege Escalation"
     ],
-    "T1176": [
-        "Persistence"
-    ],
     "T1217": [
         "Discovery"
     ],
@@ -329,6 +326,9 @@
     "T1651": [
         "Execution"
     ],
+    "T1671": [
+        "Persistence"
+    ],
     "T1580": [
         "Discovery"
     ],
@@ -351,6 +351,9 @@
         "Execution"
     ],
     "T1059.009": [
+        "Execution"
+    ],
+    "T1059.012": [
         "Execution"
     ],
     "T1059.007": [
@@ -662,6 +665,12 @@
     "T1568.001": [
         "Command and Control"
     ],
+    "T1675": [
+        "Execution"
+    ],
+    "T1667": [
+        "Impact"
+    ],
     "T1114": [
         "Collection"
     ],
@@ -673,6 +682,9 @@
     ],
     "T1114.002": [
         "Collection"
+    ],
+    "T1672": [
+        "Defense Evasion"
     ],
     "T1573": [
         "Command and Control"
@@ -784,6 +796,9 @@
     "T1546.003": [
         "Persistence",
         "Privilege Escalation"
+    ],
+    "T1668": [
+        "Persistence"
     ],
     "T1480": [
         "Defense Evasion"
@@ -963,7 +978,13 @@
     "T1564": [
         "Defense Evasion"
     ],
+    "T1564.013": [
+        "Defense Evasion"
+    ],
     "T1564.008": [
+        "Defense Evasion"
+    ],
+    "T1564.014": [
         "Defense Evasion"
     ],
     "T1564.012": [
@@ -1018,11 +1039,6 @@
         "Privilege Escalation"
     ],
     "T1574.001": [
-        "Defense Evasion",
-        "Persistence",
-        "Privilege Escalation"
-    ],
-    "T1574.002": [
         "Defense Evasion",
         "Persistence",
         "Privilege Escalation"
@@ -1176,6 +1192,9 @@
         "Collection",
         "Credential Access"
     ],
+    "T1674": [
+        "Execution"
+    ],
     "T1559": [
         "Execution"
     ],
@@ -1219,6 +1238,9 @@
         "Defense Evasion"
     ],
     "T1036.005": [
+        "Defense Evasion"
+    ],
+    "T1036.011": [
         "Defense Evasion"
     ],
     "T1036.003": [
@@ -1302,7 +1324,8 @@
         "Defense Evasion"
     ],
     "T1112": [
-        "Defense Evasion"
+        "Defense Evasion",
+        "Persistence"
     ],
     "T1601": [
         "Defense Evasion"
@@ -1395,6 +1418,9 @@
     "T1027.004": [
         "Defense Evasion"
     ],
+    "T1027.015": [
+        "Defense Evasion"
+    ],
     "T1027.007": [
         "Defense Evasion"
     ],
@@ -1413,10 +1439,16 @@
     "T1027.005": [
         "Defense Evasion"
     ],
+    "T1027.016": [
+        "Defense Evasion"
+    ],
     "T1027.012": [
         "Defense Evasion"
     ],
     "T1027.014": [
+        "Defense Evasion"
+    ],
+    "T1027.017": [
         "Defense Evasion"
     ],
     "T1027.002": [
@@ -1633,6 +1665,15 @@
     "T1219": [
         "Command and Control"
     ],
+    "T1219.001": [
+        "Command and Control"
+    ],
+    "T1219.003": [
+        "Command and Control"
+    ],
+    "T1219.002": [
+        "Command and Control"
+    ],
     "T1563": [
         "Lateral Movement"
     ],
@@ -1793,6 +1834,9 @@
     "T1505.003": [
         "Persistence"
     ],
+    "T1505.006": [
+        "Persistence"
+    ],
     "T1648": [
         "Execution"
     ],
@@ -1811,6 +1855,15 @@
     ],
     "T1518.001": [
         "Discovery"
+    ],
+    "T1176": [
+        "Persistence"
+    ],
+    "T1176.001": [
+        "Persistence"
+    ],
+    "T1176.002": [
+        "Persistence"
     ],
     "T1608": [
         "Resource Development"
@@ -1983,6 +2036,9 @@
     "T1569.002": [
         "Execution"
     ],
+    "T1569.003": [
+        "Execution"
+    ],
     "T1529": [
         "Impact"
     ],
@@ -2017,6 +2073,9 @@
         "Defense Evasion"
     ],
     "T1127.002": [
+        "Defense Evasion"
+    ],
+    "T1127.003": [
         "Defense Evasion"
     ],
     "T1127.001": [
@@ -2078,6 +2137,9 @@
     "T1204": [
         "Execution"
     ],
+    "T1204.004": [
+        "Execution"
+    ],
     "T1204.002": [
         "Execution"
     ],
@@ -2120,6 +2182,9 @@
     "T1125": [
         "Collection"
     ],
+    "T1673": [
+        "Discovery"
+    ],
     "T1497": [
         "Defense Evasion",
         "Discovery"
@@ -2156,6 +2221,9 @@
     ],
     "T1102.003": [
         "Command and Control"
+    ],
+    "T1669": [
+        "Initial Access"
     ],
     "T1047": [
         "Execution"
@@ -2447,6 +2515,9 @@
         "Initial Access",
         "Lateral Movement"
     ],
+    "T1451": [
+        "Initial Access"
+    ],
     "T1582": [
         "Impact"
     ],
@@ -2525,6 +2596,9 @@
     ],
     "T1512": [
         "Collection"
+    ],
+    "T1670": [
+        "Defense Evasion"
     ],
     "T1633": [
         "Defense Evasion"
