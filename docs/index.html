@@ -180,6 +180,9 @@
             margin-top: 1%;
             margin-bottom: 1%;
         }
+        /*.col-sm-12 {
+            background-color: white;
+        }*/
 
         @media (max-width: 991px) {
             .process {
@@ -206,7 +209,7 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item text-justify mt-2 mt-lg-0">
                     <span class="navbar-text">
-                        Made with ❤️ in 🇫🇷 by <a href="https://galeax.com">Galeax</a>
+                        Made with ❤️ in FR by <a href="https://galeax.com">Galeax</a>
                     </span>
                 </li>
                 <li class="nav-item container-fluid mt-2 mt-lg-0" style="width: fit-content;">
@@ -224,32 +227,45 @@
 
 
     <div class="container-fluid mt-3">
-        <div class="row">
+        <div class="row" style="margin-bottom: 3%;">
             <div class="col-sm-12">
-                <p class="text-center text-secondary">Type a list of CVEs (step 1), click on the Generate button (step 2) to compute CWE, CAPEC, and Techniques, and draw the MITRE ATT&CK navigator.</p>
-                <p class="text-center"><button class="btn btn-outline-secondary" type="button" onclick="example()">Try an example</button></p>
+                <div class="text-center">
+                    <p class="text-center text-secondary"> > Type a list of CVEs (step 1), click on the Generate button (step 2) to compute CWE, CAPEC, and Techniques, and draw the MITRE ATT&CK navigator.</p>
+                </div>
             </div>
-        </div>
-        <div class="row mx-3">
+                <div class="text-center" style="width: 100%;">
+                    <nav class="navbar justify-content-between">
+                        <form class="form-inline d-flex justify-content-center" style="margin: 2% auto;">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Search for a Software" aria-label="Search">
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="margin-left: 4%;">Search</button>
+                        </form>
+                    </nav>
+                </div>
+
+        <div class="row mx-3" style="max-width: 98.5%;">
             <div class="col-lg-3 col-md-12">
-                <h4 class="text-center">1. List of CVEs</h4>
+                <h4 class="text-center">List of CVEs</h4>
                 <div class="card column">
                     <div class="card-body" placeholder="CVE-2024-37079..." contenteditable="true" id="cves">
                     </div>
+                </div>
+                <div class="button-center mt-3">
+                    <p class="text-center"><button class="btn btn-outline-secondary" type="button" onclick="example()">Try an example</button></p>
                 </div>
             </div>
             <div class="col-lg-2 col-md-12 d-flex align-items-center process">
                 <div class="row mx-auto process-row" style="padding-right: 4%;">
                     <button type="button" class="btn btn-primary mx-auto" onclick="process()">2. Generate<br/>MITRE ATT&CK</button>
+                    <button type="button" class="btn btn-outline-secondary mx-auto mt-2" onclick="share()">Share current config</button>
                     <select id="layer_type" class="form-select mt-2 text-center bg-secondary-subtle">
                         <option value="enterprise">Enterprise</option>
                         <option value="mobile">Mobile</option>
                         <option value="ics">ICS</option>
                     </select>
-                    <button type="button" class="btn btn-outline-secondary mx-auto mt-2" onclick="share()">Share current config</button>
                 </div>
             </div>
-            <div class="col-lg-7 col-md-12 position-relative bg-white">
+            
+            <div class="col-lg-7 col-md-12 position-relative bg-white" style="max-height: 400px; margin-top: 2%;">
                 <div class="mx-3" style="width: 100%; min-height: 400px;" id="container"></div>
             </div>
         </div>
